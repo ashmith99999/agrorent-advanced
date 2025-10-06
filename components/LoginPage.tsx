@@ -4,6 +4,7 @@ import { UserRole, User } from '../types';
 
 interface LoginPageProps {
   onLogin: (role: UserRole, userData: User) => void;
+  onNavigateToSignUp: () => void;
 }
 
 const themes = {
@@ -65,7 +66,7 @@ const themes = {
   },
 };
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigateToSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -90,7 +91,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       let role: UserRole = 'user';
       let userData: User;
 
-      if (email.includes('owner')) {
+      if (email.toLowerCase() === 'admin@agrirent.com') {
+        role = 'admin';
+        userData = { name: 'Admin', email, phone: '+91 9999988888', memberSince: '2022', totalBookings: 0 };
+      } else if (email.includes('owner')) {
         role = 'owner';
         userData = { name: 'Suresh Reddy', email, phone: '+91 9876543211', memberSince: '2023', totalBookings: 45 };
       } else {
@@ -181,7 +185,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
 
           <p className="text-xs text-center" style={{ color: 'var(--subtle-text-color)' }}>
-            Tip: Use `owner@agrirent.com` for owner view
+            Tip: Use `owner@..` for owner, `admin@..` for admin view.
           </p>
 
           <button
@@ -195,6 +199,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             }
           </button>
         </form>
+
+        <p className="text-center text-sm text-[var(--subtle-text-color)] mt-6">
+          Don't have an account?{' '}
+          <button onClick={onNavigateToSignUp} className="font-bold text-[var(--primary-color)] hover:underline">
+            Sign Up
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
+import SignUpPage from './components/SignUpPage';
 import MainApp from './components/MainApp';
 import UserProfile from './components/UserProfile';
 import OwnerDashboard from './components/OwnerDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import { View, UserRole, User, Booking, Notification, Machinery } from './types';
 import { MACHINERY_DATA } from './constants';
 
@@ -25,6 +27,9 @@ const App = () => {
       case 'ownerDashboard':
         setBackgroundClass('bg-view-owner');
         break;
+      case 'adminDashboard':
+        setBackgroundClass('bg-view-admin');
+        break;
       default:
         setBackgroundClass('');
         break;
@@ -38,6 +43,8 @@ const App = () => {
     
     if (role === 'owner') {
         setCurrentView('ownerDashboard');
+    } else if (role === 'admin') {
+        setCurrentView('adminDashboard');
     } else {
         setCurrentView('main');
     }
@@ -52,6 +59,26 @@ const App = () => {
         { id: 1, message: 'Your booking for John Deere 5075E starts in 2 days', type: 'info', time: '2 hours ago' },
       ]);
     }
+  };
+
+  const handleSignUp = (userData: Omit<User, 'memberSince' | 'totalBookings'>) => {
+    const newUser: User = {
+      ...userData,
+      memberSince: new Date().getFullYear().toString(),
+      totalBookings: 0,
+    };
+    setCurrentUser(newUser);
+    setUserRole('user');
+    setCurrentView('main');
+    setBookings([]);
+    setNotifications([
+      {
+        id: Date.now(),
+        message: `Welcome to AgriRent, ${newUser.name}! Explore our catalog to get started.`,
+        type: 'success',
+        time: 'Just now'
+      }
+    ]);
   };
 
   const handleLogout = () => {
@@ -80,19 +107,28 @@ const App = () => {
   };
 
   if (currentView === 'login') {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} onNavigateToSignUp={() => setCurrentView('signup')} />;
+  }
+  
+  if (currentView === 'signup') {
+    return <SignUpPage onSignUp={handleSignUp} onNavigateToLogin={() => setCurrentView('login')} />;
   }
 
   // Guard against rendering main app without a user
   if (!currentUser) {
     setCurrentView('login');
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} onNavigateToSignUp={() => setCurrentView('signup')} />;
   }
   
-  // Guard against non-owners accessing owner dashboard
+  // Guard against non-owners/admins accessing protected dashboards
   if (currentView === 'ownerDashboard' && userRole !== 'owner') {
     setCurrentView('login');
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} onNavigateToSignUp={() => setCurrentView('signup')} />;
+  }
+  
+  if (currentView === 'adminDashboard' && userRole !== 'admin') {
+    setCurrentView('login');
+    return <LoginPage onLogin={handleLogin} onNavigateToSignUp={() => setCurrentView('signup')} />;
   }
 
   const renderMainContent = () => {
@@ -117,6 +153,11 @@ const App = () => {
         />;
       case 'ownerDashboard':
         return <OwnerDashboard
+            currentUser={currentUser}
+            onLogout={handleLogout}
+        />;
+      case 'adminDashboard':
+        return <AdminDashboard
             currentUser={currentUser}
             onLogout={handleLogout}
         />;

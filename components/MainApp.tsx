@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Booking, Notification, Machinery, UserRole, WeatherData, CollectiveBooking } from '../types';
 import { Tractor, User as UserIcon, Bell, LogOut, BookOpen, Menu } from 'lucide-react';
 import PaymentModal from './PaymentModal';
@@ -23,31 +23,78 @@ interface MainAppProps {
 
 type ActiveTab = 'home' | 'catalog' | 'recommend' | 'weather' | 'yield' | 'training';
 
+const generateMockWeatherData = (location: string): WeatherData => {
+  const seed = location.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const forecast: WeatherData['forecast'] = [];
+  const conditions = [
+    { name: 'Sunny', icon: '☀️' }, { name: 'Partly Cloudy', icon: '⛅' },
+    { name: 'Cloudy', icon: '☁️' }, { name: 'Light Rain', icon: '🌦️' },
+    { name: 'Heavy Rain', icon: '🌧️' }, { name: 'Thunderstorm', icon: '⛈️' },
+  ];
+  
+  let recommendation = 'Good conditions for field work. Plan your activities accordingly.';
+  let urgency: 'high' | 'medium' | 'low' = 'low';
+
+  for (let i = 0; i < 5; i++) {
+    const daySeed = seed + i;
+    const temp = 26 + Math.round(Math.sin(daySeed) * 5); // Temp between 21 and 31
+    const rainfall = Math.max(0, Math.min(95, Math.round(Math.cos(daySeed * 2) * 50 + 40))); // Rainfall chance
+    const conditionIndex = Math.floor((rainfall / 100) * (conditions.length -1));
+    const condition = conditions[conditionIndex];
+    
+    const ideal = rainfall < 40;
+    let alert: string | undefined = undefined;
+    if (rainfall > 75) {
+      alert = 'Not suitable for field work';
+      if (i < 2) { // if heavy rain in next 2 days
+        recommendation = 'Book machinery now before heavy rain arrives!';
+        urgency = 'high';
+      }
+    }
+
+    forecast.push({
+      day: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `Day ${i + 1}`,
+      condition: condition.name,
+      temp,
+      rainfall,
+      icon: condition.icon,
+      ideal,
+      alert
+    });
+  }
+
+  return {
+    current: { temp: forecast[0].temp, condition: forecast[0].condition },
+    forecast,
+    recommendation,
+    urgency,
+  };
+};
+
 const MainApp: React.FC<MainAppProps> = ({ onLogout, onNavigateToProfile, currentUser, bookings, notifications, onBooking, machinery }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedMachinery, setSelectedMachinery] = useState<Machinery | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState('Mangaluru');
   const [collectiveBookings, setCollectiveBookings] = useState<CollectiveBooking[]>([]);
   const [showCollectiveModal, setShowCollectiveModal] = useState(false);
   const [selectedCollective, setSelectedCollective] = useState<CollectiveBooking | null>(null);
 
-  useEffect(() => {
-    // Simulating API calls
-    setWeatherData({
-      current: { temp: 28, condition: 'Sunny' },
-      forecast: [
-        { day: 'Today', condition: 'Sunny', temp: 28, rainfall: 0, icon: '☀️', ideal: true },
-        { day: 'Tomorrow', condition: 'Cloudy', temp: 27, rainfall: 10, icon: '⛅', ideal: true },
-        { day: 'Day 3', condition: 'Heavy Rain', temp: 24, rainfall: 85, icon: '🌧️', ideal: false, alert: 'Not suitable for field work' },
-        { day: 'Day 4', condition: 'Rain', temp: 23, rainfall: 60, icon: '🌦️', ideal: false },
-        { day: 'Day 5', condition: 'Cloudy', temp: 26, rainfall: 20, icon: '☁️', ideal: true },
-      ],
-      recommendation: 'Book machinery today or tomorrow before heavy rain!',
-      urgency: 'high'
-    });
+  const handleFetchWeather = useCallback(async (location: string) => {
+    setIsWeatherLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    setWeatherData(generateMockWeatherData(location));
+    setIsWeatherLoading(false);
+  }, []);
 
+  useEffect(() => {
+    handleFetchWeather(selectedLocation);
+  }, [selectedLocation, handleFetchWeather]);
+
+  useEffect(() => {
     setCollectiveBookings([
       {
         id: 1, machinery: 'Combine Harvester', machineryId: 3, location: 'Mysuru', distance: 145, originalPrice: 3500, sharedPrice: 1200, currentMembers: 2, requiredMembers: 3, savings: 2300, date: '2025-10-08', members: ['Manjunath K', 'Ravi Kumar'], timeLeft: '2 days'
@@ -90,7 +137,13 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout, onNavigateToProfile, curren
       case 'recommend':
         return <RecommendTab machinery={machinery} weatherData={weatherData} handleRentClick={handleRentClick} />;
       case 'weather':
-        return <WeatherTab weatherData={weatherData} />;
+        return <WeatherTab
+          weatherData={weatherData}
+          isLoading={isWeatherLoading}
+          location={selectedLocation}
+          onLocationChange={setSelectedLocation}
+          onRefresh={() => handleFetchWeather(selectedLocation)}
+        />;
       case 'yield':
         return <YieldTab machinery={machinery} weatherData={weatherData} handleRentClick={handleRentClick} />;
       case 'training':

@@ -1,5 +1,5 @@
-export type View = 'login' | 'main' | 'profile' | 'ownerDashboard';
-export type UserRole = 'user' | 'admin' | 'owner';
+export type View = 'login' | 'signup' | 'main' | 'profile' | 'ownerDashboard' | 'adminDashboard';
+export type UserRole = 'user' | 'owner' | 'admin';
 
 export interface User {
   name: string;
@@ -123,6 +123,11 @@ export interface TrainingModule {
   duration: number; // in minutes
   icon: string;
   description: string;
+  content?: {
+    type: 'checklist' | 'video' | 'text';
+    items: string[];
+    links?: { title: string; url: string; }[];
+  };
 }
 
 export interface OwnerBooking {

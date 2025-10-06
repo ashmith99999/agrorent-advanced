@@ -3,6 +3,7 @@ import { Machinery, TrainingModule, OwnerBooking, CustomerReview, MaintenanceAle
 export const CROP_TYPES: string[] = ['Wheat', 'Rice', 'Cotton', 'Sugarcane', 'Maize', 'Vegetables', 'Fruits'];
 export const SOIL_TYPES: string[] = ['Red Soil', 'Black Soil', 'Alluvial Soil', 'Laterite Soil', 'Clay Soil', 'Sandy Soil'];
 export const REGIONS: string[] = ['Bangalore Rural', 'Bangalore Urban', 'Mysuru', 'Kalaburagi', 'Mangaluru', 'Tumakuru'];
+export const DAKSHINA_KANNADA_LOCATIONS: string[] = ['Mangaluru', 'Puttur', 'Sullia', 'Bantwal', 'Moodbidri', 'Belthangady'];
 
 export const CROP_YIELD_DATA: { [key: string]: { baseYield: number, unit: string, optimalSoils: string[], optimalPlantingMonth: number } } = {
   'Wheat': { baseYield: 2.5, unit: 'tons/acre', optimalSoils: ['Alluvial Soil', 'Black Soil'], optimalPlantingMonth: 10 },
@@ -25,14 +26,43 @@ export const MACHINERY_DATA: Machinery[] = [
 ];
 
 export const TRAINING_MODULES: TrainingModule[] = [
-  { id: 1, title: 'Tractor Operation Basics', type: 'Video', machineryType: ['Tractor'], difficulty: 'Beginner', duration: 15, icon: '📹', description: 'A comprehensive video guide for first-time tractor operators.' },
-  { id: 2, title: 'Harvester Pre-flight Checks', type: 'Manual', machineryType: ['Harvester'], difficulty: 'Beginner', duration: 10, icon: '📖', description: 'A step-by-step checklist to perform before starting the harvester.' },
-  { id: 3, title: 'Advanced Plowing Techniques', type: 'Video', machineryType: ['Tractor', 'Cultivator'], difficulty: 'Advanced', duration: 25, icon: '📹', description: 'Maximize efficiency with advanced plowing patterns and techniques.' },
-  { id: 4, title: 'Sprayer Nozzle Maintenance', type: 'Quick Tip', machineryType: ['Sprayer'], difficulty: 'Intermediate', duration: 5, icon: '💡', description: 'Learn how to clean and maintain sprayer nozzles for optimal performance.' },
-  { id: 5, title: 'Seeder Calibration Guide', type: 'Manual', machineryType: ['Seeder'], difficulty: 'Intermediate', duration: 20, icon: '📖', description: 'Ensure accurate seed distribution with proper seeder calibration.' },
-  { id: 6, title: 'Operating on Uneven Terrain', type: 'Quick Tip', machineryType: ['Tractor', 'Harvester'], difficulty: 'Advanced', duration: 5, icon: '💡', description: 'Key safety considerations for operating machinery on slopes and hills.' },
-  { id: 7, title: 'Daily Tractor Maintenance', type: 'Manual', machineryType: ['Tractor'], difficulty: 'Intermediate', duration: 15, icon: '📖', description: 'A daily routine to keep your rented tractor in top condition.' },
+  { id: 1, title: 'Tractor Operation Basics', type: 'Video', machineryType: ['Tractor'], difficulty: 'Beginner', duration: 15, icon: '📹', description: 'A comprehensive video guide for first-time tractor operators.', content: { type: 'video', items: ['This video covers steering, PTO engagement, and basic implement attachment.'], links: [
+    { title: 'Good Works Tractors: Tractor 101', url: 'https://www.youtube.com/watch?v=example1' },
+    { title: 'Messick\'s: How to Drive a Tractor for Beginners', url: 'https://www.youtube.com/watch?v=example2' },
+    { title: 'John Deere: Basic Tractor Controls and Operation', url: 'https://www.youtube.com/watch?v=example3' }
+  ] } },
+  { id: 2, title: 'Harvester Pre-flight Checks', type: 'Manual', machineryType: ['Harvester'], difficulty: 'Beginner', duration: 10, icon: '📖', description: 'A step-by-step checklist to perform before starting the harvester.', content: { type: 'checklist', items: [
+    'Check fuel and fluid levels (engine oil, coolant, hydraulic fluid).',
+    'Inspect tires for proper inflation and wear.',
+    'Ensure all safety shields and guards are in place and secure.',
+    'Check header, reel, and cutter bar for damage or obstructions.',
+    'Verify that all lights and warning signals are operational.',
+    'Clean all windows and mirrors for maximum visibility.',
+    'Confirm the fire extinguisher is charged and accessible.',
+  ]}},
+  { id: 3, title: 'Advanced Plowing Techniques', type: 'Video', machineryType: ['Tractor', 'Cultivator'], difficulty: 'Advanced', duration: 25, icon: '📹', description: 'Maximize efficiency with advanced plowing patterns and techniques.', content: { type: 'video', items: ['Learn about headland patterns, contour plowing, and minimizing soil compaction for better yields.'] } },
+  { id: 4, title: 'Sprayer Nozzle Maintenance', type: 'Quick Tip', machineryType: ['Sprayer'], difficulty: 'Intermediate', duration: 5, icon: '💡', description: 'Learn how to clean and maintain sprayer nozzles for optimal performance.', content: { type: 'text', items: ['Clogged nozzles lead to uneven application. Soak nozzles in a cleaning solution and use a soft brush to remove residue. Never use a metal wire, as it can damage the orifice.'] } },
+  { id: 5, title: 'Seeder Calibration Guide', type: 'Manual', machineryType: ['Seeder'], difficulty: 'Intermediate', duration: 20, icon: '📖', description: 'Ensure accurate seed distribution with proper seeder calibration.', content: { type: 'checklist', items: [
+    'Consult the operator\'s manual for initial settings based on seed type.',
+    'Fill the hopper with the seed to be planted.',
+    'Place a tarp or tray under the seed tubes.',
+    'Turn the drive wheel a specific number of rotations (as per manual).',
+    'Collect and weigh the dropped seed.',
+    'Calculate the seeding rate and adjust settings as needed.',
+    'Repeat until the desired rate is achieved.',
+  ]}},
+  { id: 6, title: 'Operating on Uneven Terrain', type: 'Quick Tip', machineryType: ['Tractor', 'Harvester'], difficulty: 'Advanced', duration: 5, icon: '💡', description: 'Key safety considerations for operating machinery on slopes and hills.', content: { type: 'text', items: ['Always drive up and down slopes, not across them, to prevent rollovers. Keep the heavy end of the machine uphill. Use a lower gear for better control and avoid sudden starts, stops, or turns.'] } },
+  { id: 7, title: 'Daily Tractor Maintenance', type: 'Manual', machineryType: ['Tractor'], difficulty: 'Intermediate', duration: 15, icon: '📖', description: 'A daily routine to keep your rented tractor in top condition.', content: { type: 'checklist', items: [
+    'Check engine oil level.',
+    'Check coolant level in radiator.',
+    'Check fuel level and drain water from fuel filter.',
+    'Inspect air filter for dirt and debris.',
+    'Check tire pressure.',
+    'Test brakes and lights.',
+    'Grease all lubrication points as specified in the manual.',
+  ]}},
 ];
+
 
 export const OWNER_BOOKINGS_DATA: OwnerBooking[] = [
   { id: 1, machineryName: 'Mahindra 575 DI', renterName: 'Anitha Sharma', startDate: '2025-10-02', endDate: '2025-10-05', earnings: 2400, status: 'upcoming' },
